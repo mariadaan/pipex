@@ -6,10 +6,10 @@
 -	read		CHECK
 -	write		CHECK
 -	malloc		CHECK
--	waitpid		
+-	waitpid		CHECK
 -	wait		CHECK
 -	free		CHECK
--	pipe		
+-	pipe		CHECK
 -	dup			
 -	dup2		
 -	execve		CHECK
