@@ -6,8 +6,9 @@
 
 // fork
 /*
-	id == 0 -> child process
-	id > 0 -> main process
+	id == 0		->	child process
+	id > 0		->	parent process
+	id == -1	->	error with fork
 */
 int	main(int argc, char* argv[])
 {
