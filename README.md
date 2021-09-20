@@ -10,8 +10,8 @@
 -	wait		CHECK
 -	free		CHECK
 -	pipe		CHECK
--	dup			
--	dup2		
+-	dup			CHECK
+-	dup2		CHECK
 -	execve		CHECK
 -	fork		CHECK
 -	perror		CHECK
