@@ -7,6 +7,10 @@
 #include <fcntl.h>
 
 // gcc pipex.c -o pipex && ./pipex file_in /bin/cat /usr/bin/wc file_out
+// gcc pipex.c -o pipex && ./pipex file_in /bin/cat /usr/bin/grep gewoon file_out
+
+	// fd[0]		->	read
+	// fd[1]		->	write
 
 int	printstr(char *name, char *str)
 {
@@ -28,48 +32,57 @@ int	error_msg(char *message)
 
 int	main(int argc, char *argv[], char *envp[])
 {
-	char	*filename;
+	char	*param;
+	char	*file_out;
 	char	*cmd;
-	int		fd;
+	int		fd_out;
+	int	fd[2];
 
-	if (argc <= 4)
-		return (error_msg("pls provide 4 arguments"));
-	
-	filename = argv[1];
-	cmd = argv[2];
+	if (argc <= 5)
+		return (error_msg("pls provide 5 arguments"));
 
-	int pid = fork();
-	if (pid == 0) // child
+	if (pipe(fd) == -1)
+		return (1);
+
+	int pid1 = fork();
+	if (pid1 == -1)
+		return (2);
+
+	if (pid1 == 0) // child process 1 (cat)
 	{
-		filename = argv[1];
+		param = argv[1];
 		cmd = argv[2];
-		printstr("1filename", filename);
-		printstr("1cmd", cmd);
-		printf("\n");
+		char* argvec[] = { cmd, param, NULL };
+		close(fd[0]);
+		dup2(fd[1], STDOUT_FILENO); // takes in first id, duplicates it into second id
+		close(fd[1]); // close 1 because it was duplicated and we dont need 2
+		execve(cmd, argvec, envp); // end of child process, replaced by exec process
 	}
-	else
+
+	int pid2 = fork();
+	if (pid2 == -1)
+		return (3);
+	if (pid2 == 0) // child process 2 (grep)
 	{
-		wait(NULL);
+		waitpid(pid1, NULL, 0);
 		cmd = argv[3];
-		filename = argv[4];
-		printstr("2filename", filename);
-		printstr("2cmd", cmd);
-		printf("\n");
-		fd = open(filename, O_WRONLY);
-		dup2(fd, STDOUT_FILENO);
-		close(fd);
+		param = argv[4];
+		file_out = argv[5];
+		fd_out = open(file_out, O_WRONLY | O_CREAT, 0777);
+		// /usr/bin/grep gewoon file_out
+		char *argvec[] = {cmd, param, NULL};
+		dup2(fd[0], STDIN_FILENO); // ??
+		dup2(fd_out, STDOUT_FILENO); // output naar file_out
+		close(fd[0]);
+		close(fd[1]);
+		close(fd_out);
+		int res = execve(cmd, argvec, envp);
 	}
-
-	printstr("filename", filename);
-	printstr("cmd", cmd);
-	printf("\n");
-
-	
-	char* argvec[] = { cmd, filename, NULL };
-	printf("pid: %d\n", pid);
-	if (execve(cmd, argvec, envp) == -1)
-		perror("Could not execve");
-
+	close(fd[0]);
+	close(fd[1]);
+	close(fd_out);
+	waitpid(pid1, NULL, 0);
+	waitpid(pid2, NULL, 0);
 	return (0);
 }
 
