@@ -20,6 +20,8 @@
 // fd[0] read
 // fd[1] write
 
+// ping -c 5 google.com | grep statistics
+
 int	main(int argc, char* argv[])
 {
 	int fd[2];
