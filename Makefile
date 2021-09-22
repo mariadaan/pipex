@@ -10,12 +10,13 @@ LIBFT		=	libft.a
 LIBFTDIR	=	./libft/
 
 CC			=	gcc
-CFLAGS		=	-g  -Wall #-fsanitize=address -Wall -Wextra -Werror
+CFLAGS		=	-g  -Wall -fsanitize=address # -Wall -Wextra -Werror
 
 all: $(NAME)
 
 $(NAME): $(OBJS) $(HEADER)
 	make -C ./libft/
+	rm -f file_out
 	$(CC) $(CFLAGS) $(LIBFTDIR)$(LIBFT) $(OBJS) -o $(NAME)
 
 %.o: %.c
