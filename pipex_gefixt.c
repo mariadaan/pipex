@@ -100,7 +100,7 @@ int		child_two(int fd[2], char **full_cmd, char *filename, char *envp[])
 	char	*path;
 
 	path = find_path(full_cmd[0], envp);
-	fd_out = open(filename, O_WRONLY, O_TRUNC | O_CREAT, 0777);
+	fd_out = open(filename, O_WRONLY | O_TRUNC | O_CREAT, 0777);
 	if (fd_out < 0)
 		perror("output file could not be opened");
 	// /usr/bin/grep gewoon
