@@ -1,6 +1,7 @@
 NAME		=	pipex
 
-SRCS		=	pipex_gefixt.c
+SRCS		=	errors.c		\
+				pipex_gefixt.c
 
 HEADER		=	pipex.h
 

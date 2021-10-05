@@ -34,7 +34,7 @@ int		get_path_index(char *envp[])
 
 
 /*
-	Find the path to the cmd (command we want to execute)
+	Find the path to cmd (command we want to execute)
 	and return as a string in format "/usr/bin/grep"
 */
 char	*find_path(char *cmd, char *envp[])
@@ -61,8 +61,8 @@ char	*find_path(char *cmd, char *envp[])
 
 		if(access(path, F_OK) == 0)
 		{
-			printstr("path", path);
-			printf("GELUKT\n");
+			// printstr("path", path);
+			// printf("GELUKT\n");
 			return (path);
 		}
 		free(path);
@@ -115,52 +115,70 @@ int		child_two(int fd[2], char **full_cmd, char *filename, char *envp[])
 	return (0);
 }
 
+int	parse_input(t_args *args, char *argv[], char *envp[])
+{
+	args->file_in = argv[1];
+	// check if it exists!
+	args->file_out = argv[4];
+	printstr("file in ", args->file_in);
+	printstr("file out", args->file_out);
+	args->full_cmd_1 = ft_split(argv[2], ' ');
+	args->full_cmd_2 = ft_split(argv[3], ' ');
+	printstr("command 1", (args->full_cmd_1)[0]);
+	printstr("command 2", (args->full_cmd_2)[0]);
+	args->path_cmd_1 = find_path((args->full_cmd_1)[0], envp);
+	// check if it exists!
+	args->path_cmd_2 = find_path((args->full_cmd_2)[0], envp);
+	// check if it exists!
+	printstr("path 1", args->path_cmd_1);
+	printstr("path 2", args->path_cmd_2);
+	return (0);
+}
+
+// int	child_process()
+// {
+// 	int pid1;
+	
+// 	pid1 = fork();
+// 	if (pid1 == -1)
+// 		return (2);
+// }
+
 int	main(int argc, char *argv[], char *envp[])
 {
-	char	*filename;
-	int		fd_out;
+	t_args	args;
+	int		pid1;
+	int		pid2;
 	int		fd[2];
-	char	**full_cmd_one;
-	char	**full_cmd_two;
 
 	if (argc <= 4)
-		return (1);
+		error_msg(2, "Incorrect arguments. Run in following format: ./pipex "
+					"file_in \"cmd file_in\" \"grep FANTASTISCH\" file_out");
 	if (pipe(fd) == -1)
-		return (1);
+		error_msg(3, "Could not open fd's with pipe");
 
-	int pid1 = fork();
+	parse_input(&args, argv, envp);
+	pid1 = fork();
 	if (pid1 == -1)
 		return (2);
 
-	full_cmd_one = NULL;
-	full_cmd_two = NULL;
-	fd_out = -1;
 	if (pid1 == 0) // child process 1 (cat)
 	{
-		filename = argv[1]; // file_in
-		// cmd = argv[2]; // cat iets
-		full_cmd_one = ft_split(argv[2], ' ');
-		// argvec moet in de volgorde {/bin/cat, flags, file_in, NULL}
-		// to do: dit in goeie volgorde in een 2d array krijgen.
-
-		child_one(fd, full_cmd_one, filename, envp);
+		child_one(fd, args.full_cmd_1, args.file_in, envp);
 	}
 
-	int pid2 = fork();
+	pid2 = fork();
 	if (pid2 == -1)
 		return (3);
 	if (pid2 == 0) // child process 2 (grep)
 	{
 		waitpid(pid1, NULL, 0);
-		filename = argv[4];
-		full_cmd_two = ft_split(argv[3], ' ');
-		child_two(fd, full_cmd_two, filename, envp);
+		child_two(fd, args.full_cmd_2, args.file_out, envp);
 	}
 	close(fd[0]);
 	close(fd[1]);
-	close(fd_out);
-	free_2darray(full_cmd_one);
-	free_2darray(full_cmd_two);
+	free_2darray(args.full_cmd_1);
+	free_2darray(args.full_cmd_2);
 	waitpid(pid1, NULL, 0);
 	waitpid(pid2, NULL, 0);
 	return (0);
