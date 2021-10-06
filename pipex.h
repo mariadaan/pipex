@@ -7,6 +7,8 @@
 #include <fcntl.h>
 #include "libft/libft.h"
 
+#define CHILD_PID 0
+
 typedef struct s_args {
 	char*	file_in;
 	char*	file_out;
@@ -17,3 +19,4 @@ typedef struct s_args {
 }			t_args;
 
 void	error_msg(int error_code, char *msg);
+void	print_info(t_args *args);
