@@ -1,7 +1,7 @@
 NAME		=	pipex
 
 SRCS		=	errors.c		\
-				pipex_gefixt.c
+				pipex.c
 
 HEADER		=	pipex.h
 
@@ -33,10 +33,9 @@ fclean: clean
 	rm -f $(MLX)
 
 re: fclean all
-	make pipe
 
 pipe:
 	make
-	./pipex file_in "cat file_in" "grep FANTASTISCH" file_out
+	./pipex file_in "cat -e" "grep FANTASTISCH" file_out
 
 .PHONY: all clean fclean re debug
