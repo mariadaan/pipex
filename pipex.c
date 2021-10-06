@@ -1,61 +1,39 @@
-
 #include "pipex.h"
 
 // gcc pipex.c -o pipex && ./pipex file_in /bin/cat /usr/bin/wc file_out
 // gcc pipex.c -o pipex && ./pipex file_in /bin/cat /usr/bin/grep gewoon file_out
 
+//./pipex file_in cat /usr/bin/grep FANTASTISCH file_out
+
 	// fd[0]		->	read
 	// fd[1]		->	write
 
-char	**save_args(int fd[], char *argv[], char *envp[], int id)
-{
-	char *infile;
-	char **cmd;
+// ./pipex file_in "cat -e" "grep gewoon" file_out
 
-	if (id == 1)
-	{
-		infile = argv[0];
-		// printstr("infile", infile);
-		if( access(infile, F_OK) != 0 )
-		{
-			printf("infile doesn't exist\n");
-			return (NULL);
-		}
-	}
-	cmd = ft_split(argv[1], ' ');
-	ft_put2darray(cmd, ft_count_rows(cmd));
-	if (!cmd)
-		return (NULL);
-	return (cmd);
-}
 
-int		get_path_index(char *envp[])
-{
-	int i;
-	int rows;
+// void	message(int index)
+// {
+// 	char *messages[5];
 
-	i = 0;
-	rows = ft_count_rows(envp);
-	while (i < rows)
-	{
-		if (ft_strncmp(envp[i], "PATH=", 5) == 0)
-			return (i);
-		i++;
-	}
-	return (-1);
-}
-char	*find_path(char **cmd, char *envp[])
+// 	messages[0] = "no such file or directory: ";
+// 	messages[1] = "no such file or directory: ";
+
+// }
+
+/*
+	Find the path to cmd (command we want to execute)
+	and return as a string in format "/usr/bin/grep"
+*/
+char	*find_path(char *cmd, char *envp[])
 {
 	char	**paths;
 	char	*path;
 	int		path_count;
-	int		path_len;
 	int		path_index;
 	int		i;
 
 	// zoeken naar PATH in envp, dan splitten door ':', dan in elke map zoeken naar naam vd cmd
-	// ft_put2darray(envp, ft_count_rows(envp));
-	path_index = get_path_index(envp);
+	path_index = get_str_index(envp, "PATH=");
 	if (path_index < 0)
 		return (NULL);
 	paths = ft_split(envp[path_index] + 5, ':');
@@ -63,150 +41,135 @@ char	*find_path(char **cmd, char *envp[])
 	i = 0;
 	while (i < path_count)
 	{
-		// paths[i] + "/" + cmd[0]
-		path_len = ft_strlen(paths[i]) + 2 + ft_strlen(cmd[0]); // + 2 voor NULL term en "/"
-		path = ft_calloc(path_len, sizeof(char));
-		ft_strcpy(path, paths[i]);
-		ft_strlcat(path, "/", path_len);
-		ft_strlcat(path, cmd[0], path_len);
-			// printstr("path", path);
-
+		path = ft_concat_three(paths[i], "/", cmd);
 		if(access(path, F_OK) == 0)
-		{
-			printstr("path", path);
-			printf("GELUKT\n");
 			return (path);
-		}
 		free(path);
 		i++;
 	}
-	printf("NIET GELUKT\n");
+	printf("no such file or directory: %s", cmd);
 	return (NULL);
 }
 
-int	command(int fd[], char *argv[], char *envp[], int id)
+
+/*
+	Execute first command with given flags and file_in as standard input.
+	Does not write output to standard output, but to fd[1] (write end of the pipe).
+	This output will be input to the second command, as a pipe would function.
+*/
+int		child_one(t_args *args, int fd[2], char *envp[])
 {
-	char	**cmd;
-	char	*path;
-	char	*outfile;
-	int		fd_out;
+	int		fd_in;
 
-	printnum("id", id);
-	// ft_put2darray(argv, ft_count_rows(argv));
-	
-	cmd = save_args(fd, argv, envp, id);
-	printstr("cmd op plek 0", cmd[0]);
-	printstr("cmd op plek 1", cmd[1]);
-	printstr("cmd op plek 2", cmd[2]);
-	path = find_path(cmd, envp);
-	if (!path)
-	{
-		perror("path niet goed gegaan");
-		return (1);
-	}
-
-	printf("TEST\n");
-	if (id == 1) // cat
-	{
-		// close(fd[0]);
-		// dup2(fd[1], STDOUT_FILENO); // takes in first id, duplicates it into second id
-		// close(fd[1]); // close 1 because it was duplicated and we dont need 2
-		printstr("path for exec", path);
-		printf("cmd 2d array:\n");
-		ft_put2darray(cmd, ft_count_rows(cmd));
-		if (execve(path, cmd, envp) == -1) // end of child process, replaced by exec process
-			perror("Could not execve");
-	}
-	if (id == 2) // grep
-	{
-		outfile = argv[ft_count_rows(argv) - 1];
-		printstr("outfile", outfile);
-		fd_out = open(outfile, O_WRONLY | O_CREAT, 0777);
-		printnum("fd out", fd_out);
-		dup2(fd[0], STDIN_FILENO); // ??
-		dup2(fd_out, STDOUT_FILENO); // output naar file_out
-		close(fd[0]);
-		close(fd[1]);
-		close(fd_out);
-	}
-	printf("TEST\n");
-
-
-
-	return (0);
-}
-
-int	command1(int fd[], char *argv[], char *envp[])
-{
-	char	**cmd;
-	char	*path;
-
-	cmd = save_args(fd, argv, envp, 1);
-	path = find_path(cmd, envp);
-	if (!path)
-		return (1);
-	// char* argvec[] = { cmd[0], cmd[1], NULL };
+	fd_in = open(args->file_in, O_RDONLY);
+	if (fd_in < 0)
+		perror("output file could not be opened");
 	close(fd[0]);
-	dup2(fd[1], STDOUT_FILENO); // takes in first id, duplicates it into second id
+	dup2(fd_in, STDIN_FILENO); // Use file_in instead of standard input
+	dup2(fd[1], STDOUT_FILENO); // Write to fd[1] instead of standard output
 	close(fd[1]); // close 1 because it was duplicated and we dont need 2
-	execve(path, cmd, envp); // end of child process, replaced by exec process
+	execve(args->path_cmd_1, args->full_cmd_1, envp);
+	perror("Could not execve");
 	return (0);
 }
 
-int	command2(int fd[], char *argv[], char *envp[])
+int		child_two(int fd[2], char **full_cmd, char *filename, char *envp[])
 {
-	char	**command;
 	int		fd_out;
+	char	*path;
 
-	command = ft_split(argv[3], ' ');
-	fd_out = open(argv[4], O_WRONLY | O_CREAT, 0777);
-	dup2(fd[0], STDIN_FILENO); // ??
+	path = find_path(full_cmd[0], envp);
+	fd_out = open(filename, O_WRONLY | O_TRUNC | O_CREAT, 0777);
+	if (fd_out < 0)
+		perror("output file could not be opened");
+	// /usr/bin/grep gewoon
+	char *argvec[] = {path, full_cmd[1], NULL};
+	dup2(fd[0], STDIN_FILENO); // read input from fd[0]
 	dup2(fd_out, STDOUT_FILENO); // output naar file_out
 	close(fd[0]);
 	close(fd[1]);
 	close(fd_out);
-	execve(command[0], command, envp);
-	free_2darray(command); // komt ie hier wel?
+	execve(path, argvec, envp); // end of child process, replaced by exec process
+	perror("Could not execve");
 	return (0);
 }
-/*
-	Gewenst: 2d array met [0] de command en [1] en verder de flags
-	en een variabele met aantal elementen
-*/
-int	main(int argc, char *argv[], char *envp[])
+
+int	parse_input(t_args *args, char *argv[], char *envp[])
+{
+	args->file_in = argv[1];
+	if(access(args->file_in, F_OK) != 0) // check if file_in exists!
+		return (1);
+	args->file_out = argv[4]; // doesnt have to be checked bc file is made when it doesnt exist
+	args->full_cmd_1 = ft_split(argv[2], ' ');
+	args->full_cmd_2 = ft_split(argv[3], ' ');
+	args->path_cmd_1 = find_path((args->full_cmd_1)[0], envp);
+	if (!(args->path_cmd_1)) // check if path exists
+		return (1);
+	args->path_cmd_2 = find_path((args->full_cmd_2)[0], envp);
+	if (!(args->path_cmd_1)) // check if path exists
+		return (1);
+	// print_info(args);
+	return (0);
+}
+
+void	wrap_up(int *fd, t_args *args, int pid1, int pid2)
+{
+	close(fd[0]);
+	close(fd[1]);
+	free_2darray(args->full_cmd_1);
+	free_2darray(args->full_cmd_2);
+	waitpid(pid1, NULL, 0);
+	waitpid(pid2, NULL, 0);
+}
+
+void	pipe_simulator(t_args *args, char **envp)
 {
 	int		fd[2];
 	int		pid1;
 	int		pid2;
 
-	printf("\n\n\n");
-	if (argc <= 4)
-		return (1);
 	if (pipe(fd) == -1)
-		return (2);
+		error_msg(2, "Could not open fd's with pipe");
 	pid1 = fork();
-	if (pid1 < 0)
-		return (3);
-	if (pid1 == 0) // child process 1 (cat)
-	{
-		command(fd, argv + 1, envp, 1);
-	}
+	if (pid1 == -1)
+		error_msg(2, "First fork unsuccesful");
+	if (pid1 == CHILD_PID) // child process 1 (cat)
+		child_one(args, fd, envp);
 	pid2 = fork();
-	if (pid2 < 0)
-		return (4);
-	if (pid2 == 0) // child process 2 (grep)
+	if (pid2 == -1)
+		error_msg(2, "Second fork unsuccesful");
+	if (pid2 == CHILD_PID) // child process 2 (grep)
 	{
 		waitpid(pid1, NULL, 0);
-		command(fd, argv + 2, envp, 2);
+		child_two(fd, args->full_cmd_2, args->file_out, envp);
 	}
-	close(fd[0]);
-	close(fd[1]);
-	waitpid(pid1, NULL, 0);
-	waitpid(pid2, NULL, 0);
+	wrap_up(fd, args, pid1, pid2);
+}
+
+int	main(int argc, char *argv[], char *envp[])
+{
+	t_args	args;
+
+	if (argc <= 4)
+		error_msg(2, "Incorrect arguments. Run in following format: ./pipex "
+					"file_in \"cmd file_in\" \"cmd flag\" file_out");
+	parse_input(&args, argv, envp);
+	pipe_simulator(&args, envp);
 	return (0);
 }
 
 /*
 	$PATH splitten dubbele punten
 	elke folder door en zoeken naar executable
+*/
+
+/*
+	EXIT CODES:
+	0 succes
+	2 error
+
+	< file_in ls -l | wc -l > outfile
+	./pipex file_in "ls -l" "wc -l" outfile2
+
+
 */
