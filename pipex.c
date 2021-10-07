@@ -69,8 +69,8 @@ int		child_one(t_args *args, int fd[2], char *envp[])
 	dup2(fd[1], STDOUT_FILENO); // Write to fd[1] instead of standard output
 	close(fd[1]); // close 1 because it was duplicated and we dont need 2
 	execve(args->path_cmd_1, args->full_cmd_1, envp);
-	perror("Could not execve");
-	return (0);
+	perror("Could not find program to execute");
+	return (2);
 }
 
 int		child_two(int fd[2], char **full_cmd, char *filename, char *envp[])
@@ -91,7 +91,7 @@ int		child_two(int fd[2], char **full_cmd, char *filename, char *envp[])
 	close(fd_out);
 	execve(path, argvec, envp); // end of child process, replaced by exec process
 	perror("Could not execve");
-	return (0);
+	return (2);
 }
 
 int	parse_input(t_args *args, char *argv[], char *envp[])
@@ -122,6 +122,26 @@ void	wrap_up(int *fd, t_args *args, int pid1, int pid2)
 	waitpid(pid2, NULL, 0);
 }
 
+void	parent(int pid1, int pid2)
+{
+	int	wstatus;
+	int status_code;
+
+	waitpid(pid1, &wstatus, 0);
+	waitpid(pid1, &wstatus, 0);
+
+	if (WIFEXITED(wstatus))
+	{
+		printf("executed normally");
+		status_code = WEXITSTATUS(wstatus); //
+		if (status_code == 0)
+			printf("success");
+		else
+			printf("fail");
+	}
+	printf("fail");
+}
+
 void	pipe_simulator(t_args *args, char **envp)
 {
 	int		fd[2];
@@ -143,6 +163,7 @@ void	pipe_simulator(t_args *args, char **envp)
 		waitpid(pid1, NULL, 0);
 		child_two(fd, args->full_cmd_2, args->file_out, envp);
 	}
+	parent(pid1, pid2);
 	wrap_up(fd, args, pid1, pid2);
 }
 
@@ -158,15 +179,17 @@ int	main(int argc, char *argv[], char *envp[])
 	return (0);
 }
 
-/*
-	$PATH splitten dubbele punten
-	elke folder door en zoeken naar executable
-*/
 
 /*
 	EXIT CODES:
 	0 succes
 	2 error
+
+	Exit Code Number	Meaning
+	1					catchall for general errors
+	2					misuse of shell builtins, according to Bash documentation	
+	126					command invoked cannot execute
+	127					"command not found"
 
 	< file_in ls -l | wc -l > outfile
 	./pipex file_in "ls -l" "wc -l" outfile2
