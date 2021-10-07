@@ -9,6 +9,8 @@
 
 #define CHILD_PID 0
 
+#define PROGRAM_NAME bash
+
 typedef struct s_args {
 	char*	file_in;
 	char*	file_out;
