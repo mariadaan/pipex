@@ -63,34 +63,32 @@ int		child_one(t_args *args, int fd[2], char *envp[])
 
 	fd_in = open(args->file_in, O_RDONLY);
 	if (fd_in < 0)
-		perror("output file could not be opened");
+		exit_msg("input file could not be opened", 2);
 	close(fd[0]);
 	dup2(fd_in, STDIN_FILENO); // Use file_in instead of standard input
 	dup2(fd[1], STDOUT_FILENO); // Write to fd[1] instead of standard output
 	close(fd[1]); // close 1 because it was duplicated and we dont need 2
 	execve(args->path_cmd_1, args->full_cmd_1, envp);
-	perror("Could not find program to execute");
+	exit_msg("Could not find program to execute", 2);
 	return (2);
 }
 
-int		child_two(int fd[2], char **full_cmd, char *filename, char *envp[])
+int		child_two(t_args *args, int fd[2], char *envp[])
 {
 	int		fd_out;
-	char	*path;
 
-	path = find_path(full_cmd[0], envp);
-	fd_out = open(filename, O_WRONLY | O_TRUNC | O_CREAT, 0777);
+	fd_out = open(args->file_out, O_WRONLY | O_TRUNC | O_CREAT, 0777);
 	if (fd_out < 0)
-		perror("output file could not be opened");
+		exit_msg("output file could not be opened", 2);
 	// /usr/bin/grep gewoon
-	char *argvec[] = {path, full_cmd[1], NULL};
+	// char *argvec[] = {path, full_cmd[1], NULL};
 	dup2(fd[0], STDIN_FILENO); // read input from fd[0]
 	dup2(fd_out, STDOUT_FILENO); // output naar file_out
 	close(fd[0]);
 	close(fd[1]);
 	close(fd_out);
-	execve(path, argvec, envp); // end of child process, replaced by exec process
-	perror("Could not execve");
+	execve(args->path_cmd_2, args->full_cmd_2, envp); // end of child process, replaced by exec process
+	exit_msg("could not execve", 2);
 	return (2);
 }
 
@@ -149,19 +147,19 @@ void	pipe_simulator(t_args *args, char **envp)
 	int		pid2;
 
 	if (pipe(fd) == -1)
-		error_msg(2, "Could not open fd's with pipe");
+		exit_msg("Could not open fd's with pipe", 2);
 	pid1 = fork();
 	if (pid1 == -1)
-		error_msg(2, "First fork unsuccesful");
+		exit_msg("First fork unsuccesful", 2);
 	if (pid1 == CHILD_PID) // child process 1 (cat)
 		child_one(args, fd, envp);
 	pid2 = fork();
 	if (pid2 == -1)
-		error_msg(2, "Second fork unsuccesful");
+		exit_msg("Second fork unsuccesful", 2);
 	if (pid2 == CHILD_PID) // child process 2 (grep)
 	{
 		waitpid(pid1, NULL, 0);
-		child_two(fd, args->full_cmd_2, args->file_out, envp);
+		child_two(args, fd, envp);
 	}
 	parent(pid1, pid2);
 	wrap_up(fd, args, pid1, pid2);
@@ -172,8 +170,8 @@ int	main(int argc, char *argv[], char *envp[])
 	t_args	args;
 
 	if (argc <= 4)
-		error_msg(2, "Incorrect arguments. Run in following format: ./pipex "
-					"file_in \"cmd file_in\" \"cmd flag\" file_out");
+		exit_msg("Incorrect arguments. Run in following format: ./pipex "
+					"file_in \"cmd file_in\" \"cmd flag\" file_out", 2);
 	parse_input(&args, argv, envp);
 	pipe_simulator(&args, envp);
 	return (0);
