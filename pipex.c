@@ -47,7 +47,7 @@ char	*find_path(char *cmd, char *envp[])
 		free(path);
 		i++;
 	}
-	printf("no such file or directory: %s", cmd);
+	double_error_msg("command not found", cmd, 2);
 	return (NULL);
 }
 
@@ -61,15 +61,17 @@ int		child_one(t_args *args, int fd[2], char *envp[])
 {
 	int		fd_in;
 
+	if (!(args->file_in))
+		exit(2);
 	fd_in = open(args->file_in, O_RDONLY);
 	if (fd_in < 0)
-		exit_msg("input file could not be opened", 2);
+		error_msg("input file could not be opened", 2);
 	close(fd[0]);
 	dup2(fd_in, STDIN_FILENO); // Use file_in instead of standard input
 	dup2(fd[1], STDOUT_FILENO); // Write to fd[1] instead of standard output
 	close(fd[1]); // close 1 because it was duplicated and we dont need 2
 	execve(args->path_cmd_1, args->full_cmd_1, envp);
-	exit_msg("Could not find program to execute", 2);
+	exit_msg("could not execve child 1", 2);
 	return (2);
 }
 
@@ -80,15 +82,14 @@ int		child_two(t_args *args, int fd[2], char *envp[])
 	fd_out = open(args->file_out, O_WRONLY | O_TRUNC | O_CREAT, 0777);
 	if (fd_out < 0)
 		exit_msg("output file could not be opened", 2);
-	// /usr/bin/grep gewoon
-	// char *argvec[] = {path, full_cmd[1], NULL};
 	dup2(fd[0], STDIN_FILENO); // read input from fd[0]
 	dup2(fd_out, STDOUT_FILENO); // output naar file_out
 	close(fd[0]);
 	close(fd[1]);
 	close(fd_out);
+	// print_info(args);
 	execve(args->path_cmd_2, args->full_cmd_2, envp); // end of child process, replaced by exec process
-	exit_msg("could not execve", 2);
+	exit_msg("could not execve child 2", 2);
 	return (2);
 }
 
@@ -96,17 +97,15 @@ int	parse_input(t_args *args, char *argv[], char *envp[])
 {
 	args->file_in = argv[1];
 	if(access(args->file_in, F_OK) != 0) // check if file_in exists!
-		return (1);
+	{
+		double_error_msg("no such file or directory", args->file_in, 0);
+		args->file_in = NULL;
+	}
 	args->file_out = argv[4]; // doesnt have to be checked bc file is made when it doesnt exist
 	args->full_cmd_1 = ft_split(argv[2], ' ');
 	args->full_cmd_2 = ft_split(argv[3], ' ');
 	args->path_cmd_1 = find_path((args->full_cmd_1)[0], envp);
-	if (!(args->path_cmd_1)) // check if path exists
-		return (1);
 	args->path_cmd_2 = find_path((args->full_cmd_2)[0], envp);
-	if (!(args->path_cmd_1)) // check if path exists
-		return (1);
-	// print_info(args);
 	return (0);
 }
 
@@ -171,7 +170,7 @@ int	main(int argc, char *argv[], char *envp[])
 
 	if (argc <= 4)
 		exit_msg("Incorrect arguments. Run in following format: ./pipex "
-					"file_in \"cmd file_in\" \"cmd flag\" file_out", 2);
+					"file_in \"cmd flags\" \"cmd flags\" file_out", 2);
 	parse_input(&args, argv, envp);
 	pipe_simulator(&args, envp);
 	return (0);
