@@ -1,17 +1,23 @@
 #include "pipex.h"
 
-void	error_msg(int error_code, char *msg)
+void	exit_msg(char *msg, int error_code)
 {
-	int	msg_len;
-
-	if (!msg)
-		msg_len = 0;
-	else
-		msg_len = ft_strlen(msg);
-	write(STDERR_FILENO, "Error\n", 6);
-	write(STDERR_FILENO, msg, msg_len);
-	write(STDERR_FILENO, "\n", 1);
+	ft_putendl_fd(msg, STDERR_FILENO);
 	exit(error_code);
+}
+
+int	error_msg(char *msg, int error_code)
+{
+	ft_putendl_fd(msg, STDERR_FILENO);
+	return (error_code);
+}
+
+int	double_error_msg(char *msg, char *name, int error_code)
+{
+	ft_putstr_fd(msg, STDERR_FILENO);
+	ft_putstr_fd(": ", STDERR_FILENO);
+	ft_putendl_fd(name, STDERR_FILENO);
+	return (error_code);
 }
 
 void print_info(t_args *args)
