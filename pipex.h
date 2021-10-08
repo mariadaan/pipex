@@ -20,5 +20,7 @@ typedef struct s_args {
 	char*	path_cmd_2;
 }			t_args;
 
-void	error_msg(int error_code, char *msg);
+void	exit_msg(char *msg, int error_code);
+int		error_msg(char *msg, int error_code);
+int		double_error_msg(char *msg, char *name, int error_code);
 void	print_info(t_args *args);
