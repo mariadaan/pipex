@@ -139,6 +139,8 @@ void	parent(int pid1, int pid2)
 	printf("fail");
 }
 
+// test
+
 void	pipe_simulator(t_args *args, char **envp)
 {
 	int		fd[2];
