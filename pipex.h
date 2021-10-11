@@ -9,7 +9,7 @@
 
 #define CHILD_PID 0
 
-#define PROGRAM_NAME bash
+# define ARGS(...)                      (char *const []){ __VA_ARGS__, NULL }
 
 typedef struct s_args {
 	char*	file_in;
@@ -20,6 +20,19 @@ typedef struct s_args {
 	char*	path_cmd_2;
 }			t_args;
 
+/*
+	pipex.c
+*/
+char	*find_path(char *cmd, char *envp[]);
+int		child_one(t_args *args, int fd[2], char *envp[]);
+int		child_two(t_args *args, int fd[2], char *envp[]);
+int		parse_input(t_args *args, char *argv[], char *envp[]);
+void	wrap_up(int *fd, t_args *args, int pid1, int pid2);
+void	pipe_simulator(t_args *args, char **envp);
+
+/*
+	errors.c
+*/
 void	exit_msg(char *msg, int error_code);
 int		error_msg(char *msg, int error_code);
 int		double_error_msg(char *msg, char *name, int error_code);
