@@ -1,7 +1,8 @@
 NAME		=	pipex
 
-SRCS		=	errors.c		\
-				pipex.c
+SRCS		=	main.c	\
+				pipex.c		\
+				errors.c
 
 HEADER		=	pipex.h
 
@@ -11,17 +12,18 @@ LIBFT		=	libft.a
 LIBFTDIR	=	./libft/
 
 CC			=	gcc
-CFLAGS		=	-g  -Wall -fsanitize=address # -Wall -Wextra -Werror
+CFLAGS		=	-O3 -g -fsanitize=address -Wall -Wextra -Werror -I .
 
 all: $(NAME)
 
 $(NAME): $(OBJS) $(HEADER)
 	make -C ./libft/
 	rm -f file_out
+	rm -f tester_res
 	$(CC) $(CFLAGS) $(LIBFTDIR)$(LIBFT) $(OBJS) -o $(NAME)
 
 %.o: %.c
-	$(CC) -c $(CFLAGS) -Imlx -c $< -o $@
+	$(CC) -c $(CFLAGS) -c $< -o $@
 
 clean:
 	# find src -name "*.o" -type f -delete
@@ -36,6 +38,10 @@ re: fclean all
 
 pipe:
 	make
-	./pipex file_in "cat -e" "grep FANTASTISCH" file_out
+	./pipex files_in/file_in "cat -e" "grep FANTASTISCH" files_out/file_out
+
+tester:
+	make
+	./pipex 
 
 .PHONY: all clean fclean re debug
