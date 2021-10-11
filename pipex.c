@@ -21,7 +21,7 @@
 // }
 
 /*
-	Find the path to cmd (command we want to execute)
+	Find the path to cmd (command we want to execute, like "grep")
 	and return as a string in format "/usr/bin/grep"
 */
 char	*find_path(char *cmd, char *envp[])
@@ -32,7 +32,6 @@ char	*find_path(char *cmd, char *envp[])
 	int		path_index;
 	int		i;
 
-	// zoeken naar PATH in envp, dan splitten door ':', dan in elke map zoeken naar naam vd cmd
 	path_index = get_str_index(envp, "PATH=");
 	if (path_index < 0)
 		return (NULL);
@@ -119,25 +118,25 @@ void	wrap_up(int *fd, t_args *args, int pid1, int pid2)
 	waitpid(pid2, NULL, 0);
 }
 
-void	parent(int pid1, int pid2)
-{
-	int	wstatus;
-	int status_code;
+// void	parent(int pid1, int pid2)
+// {
+// 	int	wstatus;
+// 	int status_code;
 
-	waitpid(pid1, &wstatus, 0);
-	waitpid(pid1, &wstatus, 0);
+// 	waitpid(pid1, &wstatus, 0);
+// 	waitpid(pid2, &wstatus, 0);
 
-	if (WIFEXITED(wstatus))
-	{
-		printf("executed normally");
-		status_code = WEXITSTATUS(wstatus); //
-		if (status_code == 0)
-			printf("success");
-		else
-			printf("fail");
-	}
-	printf("fail");
-}
+// 	if (WIFEXITED(wstatus))
+// 	{
+// 		printf("executed normally");
+// 		status_code = WEXITSTATUS(wstatus); //
+// 		if (status_code == 0)
+// 			printf("success");
+// 		else
+// 			printf("fail");
+// 	}
+// 	printf("fail");
+// }
 
 // test
 
@@ -162,20 +161,8 @@ void	pipe_simulator(t_args *args, char **envp)
 		waitpid(pid1, NULL, 0);
 		child_two(args, fd, envp);
 	}
-	parent(pid1, pid2);
+	// parent(pid1, pid2);
 	wrap_up(fd, args, pid1, pid2);
-}
-
-int	main(int argc, char *argv[], char *envp[])
-{
-	t_args	args;
-
-	if (argc <= 4)
-		exit_msg("Incorrect arguments. Run in following format: ./pipex "
-					"file_in \"cmd flags\" \"cmd flags\" file_out", 2);
-	parse_input(&args, argv, envp);
-	pipe_simulator(&args, envp);
-	return (0);
 }
 
 
