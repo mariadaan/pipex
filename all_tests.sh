@@ -116,3 +116,6 @@ echo "non-existing flag command 2${normal}"
 printf "$RESET"
 touch files_out/res_mine
 bash single_test.sh files_in/file_in "cat -t" "grep -bestaatniet FANTASTISCH" files_out/res_mine
+
+rm -f files_out/res_real
+rm -f files_out/res_mine
