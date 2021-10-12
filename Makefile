@@ -19,8 +19,6 @@ all: $(NAME)
 
 $(NAME): $(OBJS) $(HEADER)
 	make -C ./libft/
-	rm -f file_out
-	rm -f tester_res
 	$(CC) $(CFLAGS) $(LIBFTDIR)$(LIBFT) $(OBJS) -o $(NAME)
 
 %.o: %.c
@@ -39,9 +37,5 @@ re: fclean all
 pipe:
 	make
 	./pipex files_in/file_in "cat -e" "grep FANTASTISCH" files_out/file_out
-
-tester:
-	make
-	./pipex 
 
 .PHONY: all clean fclean re debug
