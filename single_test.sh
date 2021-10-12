@@ -2,7 +2,7 @@
 <<com
 USAGE
 
-create pipex executable first, using make.
+create pipex executable first, then run this program.
 
 run command in following format:
 bash single_test.sh file_in cmd1 cmd2 file_out
@@ -18,7 +18,6 @@ RESET="\033[0m"
 RES_REAL="files_out/res_real"
 DIFF_FILE="files_out/diff.txt"
 
-# rm -f $4
 rm -f "files_out/res_mine"
 rm -f $RES_REAL
 rm -f $DIFF_FILE
@@ -62,7 +61,7 @@ else
   echo "###    WARNING: Exit Codes Are Different!      ###"
 fi
 
-echo -n "my exit code:   "
+echo -n "your exit code: "
 echo $MY_EXITCODE
 echo -n "real exit code: "
 echo $REAL_EXITCODE
