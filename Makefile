@@ -1,7 +1,8 @@
 NAME		=	pipex
 
-SRCS		=	main.c	\
+SRCS		=	main.c		\
 				pipex.c		\
+				parse.c		\
 				errors.c
 
 HEADER		=	pipex.h
@@ -12,7 +13,7 @@ LIBFT		=	libft.a
 LIBFTDIR	=	./libft/
 
 CC			=	gcc
-CFLAGS		=	-O3 -g -fsanitize=address -Wall -Wextra -Werror -I .
+CFLAGS		=	-Wall -Wextra -Werror -I .
 
 all: $(NAME)
 
@@ -26,7 +27,6 @@ $(NAME): $(OBJS) $(HEADER)
 	$(CC) -c $(CFLAGS) -c $< -o $@
 
 clean:
-	# find src -name "*.o" -type f -delete
 	rm -f $(OBJS)
 
 fclean: clean
