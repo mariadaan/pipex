@@ -2,8 +2,8 @@
 
 char	**free_2darray(char **array)
 {
-	int index;
-	
+	int	index;
+
 	index = ft_count_rows(array);
 	while (index > 0)
 	{

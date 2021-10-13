@@ -1,11 +1,13 @@
 #include "../libft.h"
 
-// checks whether a char in s2 is in s1 and returns the index in s1 to first occurence
-// return -1 if no char from s2 has been found in s1
-
+/*
+	Checks whether a char in s2 is in s1 and returns the
+	index in s1 to first occurence.
+	Return -1 if no char from s2 has been found in s1
+*/
 int	ft_setinset(char *s1, char *s2)
 {
-	int i;
+	int	i;
 
 	if (!s1 || !s2)
 		return (0);

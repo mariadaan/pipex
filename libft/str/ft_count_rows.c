@@ -1,6 +1,6 @@
 int	ft_count_rows(char **array)
 {
-	int count;
+	int	count;
 
 	if (!array)
 		return (0);

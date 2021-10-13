@@ -6,7 +6,7 @@
 #    By: mdaan <mdaan@student.codam.nl>               +#+                      #
 #                                                    +#+                       #
 #    Created: 2020/10/31 11:56:32 by mdaan         #+#    #+#                  #
-#    Updated: 2021/05/25 12:03:08 by mdaan         ########   odam.nl          #
+#    Updated: 2021/10/13 17:47:03 by mdaan         ########   odam.nl          #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,7 +16,6 @@ SRCS	=	$(wildcard ./ascii/*.c)				\
 			$(wildcard ./put/*.c)				\
 			$(wildcard ./str/*.c)				\
 			$(wildcard ./lst/*.c)				\
-			$(wildcard ./debug/*.c)				\
 			$(wildcard ./read/*.c)
 
 OBJS	=	$(SRCS:.c=.o)
@@ -32,7 +31,7 @@ $(NAME):	$(OBJS)
 			${LIBC} $(NAME) $(OBJS)
 
 %.o:		%.c libft.h
-			$(CC) -c $(FLAGS) $< -o $@
+			$(CC) -c -I . $(FLAGS) $< -o $@
 
 clean:
 			${RM} $(OBJS) $(OBJS_B)

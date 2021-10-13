@@ -6,7 +6,7 @@
 /*   By: mdaan <mdaan@student.codam.nl>               +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/11/02 13:02:54 by mdaan         #+#    #+#                 */
-/*   Updated: 2021/10/06 19:56:47 by mdaan         ########   odam.nl         */
+/*   Updated: 2021/10/13 17:37:28 by mdaan         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ int				ft_inset(char *s1, char c);
 int				ft_setinset(char *s1, char *s2);
 int				ft_modstr(char *s, char c);
 int				ft_strlend(const char *s, char end);
-char		*ft_strstr(const char *haystack, const char *needle);
+char			*ft_strstr(const char *haystack, const char *needle);
 char			*ft_strnstr(const char *haystack, const char *needle,
 					size_t len);
 int				ft_strncmp(const char *s1, const char *s2, size_t n);
@@ -109,19 +109,7 @@ t_list			*ft_lstmap(t_list *lst, void *(*f)(void *),
 /*
 **	Read functions
 */
-
 int				read_till_end(int fd, char **line);
-
-/*
-**	Debug functions
-*/
-
-int				printnum(char *name, int num);
-int				printfloat(char *name, float num);
-int				printstr(char *name, char *str);
-int				printchar(char *name, char c);
-int				printco(char *name, int x, int y);
-int				printflco(char *name, double x, double y);
 
 /*
 **	Useful str functions

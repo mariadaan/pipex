@@ -3,7 +3,6 @@
 /*
 	Returns: first index of c in str
 */
-
 int	get_findex(char *str, char c)
 {
 	int	i;
@@ -22,7 +21,6 @@ int	get_findex(char *str, char c)
 /*
 	Returns: last index of c in str
 */
-
 int	get_lindex(char *str, char c)
 {
 	int	i;
