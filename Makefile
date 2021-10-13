@@ -1,9 +1,9 @@
 NAME		=	pipex
 
-SRCS		=	main.c		\
-				pipex.c		\
-				parse.c		\
-				errors.c
+SRCS		=	src/main.c		\
+				src/pipex.c		\
+				src/parse.c		\
+				src/errors.c
 
 HEADER		=	pipex.h
 
