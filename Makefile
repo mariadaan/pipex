@@ -13,7 +13,7 @@ LIBFT		=	libft.a
 LIBFTDIR	=	./libft/
 
 CC			=	gcc
-CFLAGS		=	-Wall -Wextra -Werror -I .
+CFLAGS		=	-Wall -Wextra -Werror
 
 all: $(NAME)
 
@@ -22,7 +22,7 @@ $(NAME): $(OBJS) $(HEADER)
 	$(CC) $(CFLAGS) $(LIBFTDIR)$(LIBFT) $(OBJS) -o $(NAME)
 
 %.o: %.c
-	$(CC) -c $(CFLAGS) -c $< -o $@
+	$(CC) -c -I . $(CFLAGS) -c $< -o $@
 
 clean:
 	rm -f $(OBJS)
