@@ -1,6 +1,6 @@
 # pipex
 
-![Alt text](/plaatje-donker)
+![Alt text](/plaatje-donker.png)
 
   ███                                                              ███
   ███                                                              ███
