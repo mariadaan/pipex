@@ -14,7 +14,9 @@ To do this, the pipex program should be executed this way:
    ```
 
 'file1' is the input filename
+
 'file2' is the output filename
+
 'cmd1' and 'cmd2' are shell commands with their parameters
 
 ### Pipex Tester
