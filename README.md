@@ -13,11 +13,11 @@ To do this, the pipex program should be executed this way:
     ./pipex file1 cmd1 cmd2 file2
    ```
 
-'file1' is the input filename
+`file1` is the input filename
 
-'file2' is the output filename
+`file2` is the output filename
 
-'cmd1' and 'cmd2' are shell commands with their parameters
+`cmd1` and `cmd2` are shell commands with their parameters
 
 ### Pipex Tester
 I also made a tester for this project, make sure to check it out and test your own pipex!
